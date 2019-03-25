@@ -1,0 +1,240 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Scanner;
+
+public class Main {
+    private Random random = new Random();
+    private Scanner input = new Scanner(System.in);
+    private Scanner hintInput = new Scanner(System.in);
+    private ArrayList<String> hints = new ArrayList<>();
+    private ArrayList<String> scrambledWords = new ArrayList<>();
+    private ArrayList<String> unscrambledWords = new ArrayList<>();
+
+    public static void main(String[] args) {
+        Main main = new Main();
+        main.init();
+    }
+
+    private void init() {
+        System.out.println("Would you like to print the worksheet to a text file? If no, all outputs will remain in the console.");
+        boolean despacito = yesOrNo(input);
+
+        String hint = ".";
+        System.out.println("\nHow many words are on this week's worksheet?");
+        int arraySize1 = userArraySize(input);
+        //Creating an array that is as big as the user specifies. The code adjusts itself if the user only specifies 1 unit.
+        if (arraySize1 == 1) {
+            System.out.println("\nEnter the word you would like to scramble.");
+        } else {
+            System.out.println("\nEnter the first word you would like to scramble.");
+        }
+        //creates a loop that repeats as many times as the array is big.
+        for (int i = 0; i < arraySize1; i++) {
+            String originalWord = input.next();
+
+            char[] check = originalWord.toCharArray();
+            int repeatCounter = 0;
+            char firstLetter = check[0];
+            int wordLength = check.length;
+
+            for (char a : check) {
+                if (a == firstLetter) {
+                    repeatCounter++;
+                }
+            }
+
+            if (repeatCounter == wordLength) {
+                System.err.println("\nPlease enter a word that can be scrambled.\n");
+                i -= 1;
+            } else {
+                unscrambledWords.add(i, originalWord);
+                System.out.println("Specify a hint.");
+                hint = hint.replace(hint, hintInput.nextLine());
+                hints.add(i, hint);
+                if (arraySize1 > 1) {
+                    if (i == arraySize1 - 1) {
+                        System.out.println("The final hint you chose was:" + " " + hints.get(i));
+                    } else {
+                        System.out.println("The hint you chose was:" + " " + hints.get(i) + "," + " " + "enter another word to be scrambled.");
+                    }
+                } else {
+                    System.out.println("The hint you chose was:" + " " + hints.get(i) + ".");
+                }
+            }
+
+
+        }
+        //There is no actual reason for the name of the int below to be what it is, it's just what I felt like.
+        int dpes = 0;
+
+        if (despacito) {    //If the user chooses to produce a worksheet, this fires.
+
+            for (String word : unscrambledWords) {
+                scrambledWords.add(scramble(word, random));
+                hints.add(hint);
+            }
+            System.out.println("\nA finished worksheet has been generated.\n");
+            try (PrintWriter out = new PrintWriter("FinishedWorksheet.txt")) {
+
+                DateTimeFormatter day = DateTimeFormatter.ofPattern("dd");
+                DateTimeFormatter month = DateTimeFormatter.ofPattern("MM");
+                DateTimeFormatter year = DateTimeFormatter.ofPattern("yyyy");
+                LocalDateTime now = LocalDateTime.now();
+                
+                out.println(day.format(now) + " " + GetMonth(month) + " " + year.format(now));
+                out.println();
+                out.println();
+                for (int J = 0; J < scrambledWords.size(); J++) {
+                    out.println(scrambledWords.get(J));
+                    out.println(hints.get(J));
+                    out.println();
+                }
+            } catch (FileNotFoundException ex) {
+            }
+
+
+        } else {    //If the user chooses not to produce a worksheet, this fires.
+            if (arraySize1 > 1) {
+                for (String word : unscrambledWords) {
+                    scrambledWords.add(scramble(word, random));
+                    hints.add(hint);
+                }
+                System.out.println("\nFinished Worksheet:\n");
+
+                for (String word : scrambledWords) {
+                    System.out.println(word);
+                    System.out.println(hints.get(dpes));
+                    dpes++;
+                }
+            } else {
+                scrambledWords.add(scramble(unscrambledWords.get(0), random));
+
+                System.out.println("\nHere is your scrambled word and hint:\n" + scrambledWords.get(0));
+                System.out.println(hints.get(0));
+            }
+
+        }
+
+        System.exit(0);
+
+    }
+
+    private String scramble(String word, Random random) {
+
+        // Splits up the word into a char array
+        char[] inputArray = word.toCharArray();
+
+        int wordLength = inputArray.length;
+
+        // Shuffles the chars in the array
+        for (int currentLetter = 0; currentLetter < wordLength; currentLetter++) {
+            int randomLetter = random.nextInt(wordLength);
+            char storedLetter = inputArray[currentLetter];
+            inputArray[currentLetter] = inputArray[randomLetter];
+            inputArray[randomLetter] = storedLetter;
+        }
+
+        // Turns the modified char array back into a string
+        String scrambledWord = new String(inputArray);
+
+
+        // If the scrambled word is the same as the original, the process will repeat
+        if (scrambledWord.equals(word)) {
+            return scramble(word, random);
+        } else {
+            return scrambledWord.toLowerCase();
+        }
+    }
+
+    private boolean isWholeNumber(String number) {
+        try {
+            Integer.parseInt(number);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+
+        return Integer.parseInt(number) > 0;
+    }
+
+    private boolean yesOrNo(Scanner userResponse) {
+        String answer = userResponse.next().toUpperCase();
+        if (answer.equals("YES") || answer.equals("YEET")) {
+            return true;
+        } else if (answer.equals("NO")) {
+            return false;
+        } else {
+            // Allows the user to try again until they type yes or no.
+            System.err.println("Please try again and type Yes or No.");
+            return yesOrNo(userResponse);
+        }
+    }
+
+    private int userArraySize(Scanner numberOfPositions) {
+        int value;
+        String arraySize = numberOfPositions.next();
+
+        if (isWholeNumber(arraySize)) {
+            value = Integer.parseInt(arraySize);
+            return value;
+        } else {
+            System.err.println("Please try again and enter a whole number.");
+            return userArraySize(numberOfPositions);
+        }
+    }
+
+    private String GetMonth(DateTimeFormatter m) {
+        m = DateTimeFormatter.ofPattern("MM");
+        LocalDateTime now = LocalDateTime.now();
+        String month = m.format(now);
+
+        switch (month) {
+            case "01":
+                return "January";
+
+            case "02":
+                return "February";
+
+            case "03":
+                return "March";
+
+            case "04":
+                return "April";
+
+            case "05":
+                return "May";
+
+            case "06":
+                return "June";
+
+            case "07":
+                return "July";
+
+            case "08":
+                return "August";
+
+            case "09":
+                return "September";
+
+            case "10":
+                return "October";
+
+            case "11":
+                return "November";
+
+            case "12":
+                return "December";
+
+            default:
+                return "An error has occurred.";
+
+        }
+    }
+
+}
+//These are just IntelliJ IDEA shortcuts.
+//Ctrl+Shift+Alt+L
+//sout
