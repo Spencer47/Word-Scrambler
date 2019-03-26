@@ -21,7 +21,7 @@ public class Main {
 
     private void init() {
         System.out.println("Would you like to print the worksheet to a text file? If no, all outputs will remain in the console.");
-        boolean despacito = yesOrNo(input);
+        boolean worksheetChoice = yesOrNo(input);
 
         String hint = ".";
         System.out.println("\nHow many words are on this week's worksheet?");
@@ -57,9 +57,9 @@ public class Main {
                 hints.add(i, hint);
                 if (arraySize1 > 1) {
                     if (i == arraySize1 - 1) {
-                        System.out.println("The final hint you chose was:" + " " + hints.get(i));
+                        System.out.println("The final hint you chose was:" + " " + "\"" + hints.get(i) + "\"");
                     } else {
-                        System.out.println("The hint you chose was:" + " " + hints.get(i) + "," + " " + "enter another word to be scrambled.");
+                        System.out.println("The hint you chose was:" + " " + "\"" + hints.get(i) + "\"" + "," + " " + "enter another word to be scrambled.");
                     }
                 } else {
                     System.out.println("The hint you chose was:" + " " + hints.get(i) + ".");
@@ -71,7 +71,7 @@ public class Main {
         //There is no actual reason for the name of the int below to be what it is, it's just what I felt like.
         int dpes = 0;
 
-        if (despacito) {    //If the user chooses to produce a worksheet, this fires.
+        if (worksheetChoice) {    //If the user chooses to produce a worksheet, this fires.
 
             for (String word : unscrambledWords) {
                 scrambledWords.add(scramble(word, random));
@@ -84,13 +84,17 @@ public class Main {
                 DateTimeFormatter month = DateTimeFormatter.ofPattern("MM");
                 DateTimeFormatter year = DateTimeFormatter.ofPattern("yyyy");
                 LocalDateTime now = LocalDateTime.now();
-                
+
                 out.println(day.format(now) + " " + GetMonth(month) + " " + year.format(now));
                 out.println();
                 out.println();
                 for (int J = 0; J < scrambledWords.size(); J++) {
                     out.println(scrambledWords.get(J));
-                    out.println(hints.get(J));
+                    if (hints.get(J).contains(".")) {
+                        out.println(hints.get(J));
+                    } else {
+                        out.println(hints.get(J) + ".");
+                    }
                     out.println();
                 }
             } catch (FileNotFoundException ex) {
@@ -107,14 +111,22 @@ public class Main {
 
                 for (String word : scrambledWords) {
                     System.out.println(word);
-                    System.out.println(hints.get(dpes));
+                    if (hints.get(dpes).contains(".")) {
+                        System.out.println(hints.get(dpes));
+                    } else {
+                        System.out.println(hints.get(dpes) + ".");
+                    }
                     dpes++;
                 }
             } else {
                 scrambledWords.add(scramble(unscrambledWords.get(0), random));
 
                 System.out.println("\nHere is your scrambled word and hint:\n" + scrambledWords.get(0));
-                System.out.println(hints.get(0));
+                if (hints.get(0).contains(".")) {
+                    System.out.println(hints.get(0));
+                } else {
+                    System.out.println(hints.get(0) + ".");
+                }
             }
 
         }
